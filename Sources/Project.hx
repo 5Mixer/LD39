@@ -1,0 +1,116 @@
+package;
+
+import kha.Framebuffer;
+import kha.Scheduler;
+import kha.System;
+
+class Project {
+	var playerGrid:NationGrid;
+	var enemyGrid:NationGrid;
+	var input:Input;
+	var inBattle = false;
+	var camera:Camera;
+	var tilePlaceIndex = 0;
+	public var citizens = new Array<Citizen>();
+	public var particles = new Array<Particle>();
+	var nationGrids = new Array<NationGrid>();
+	var frame = 0;
+	public function new() {
+		System.notifyOnRender(render);
+		Scheduler.addTimeTask(update, 0, 1 / 60);
+
+		input = new Input();
+		camera = new Camera();
+
+		playerGrid = new NationGrid();
+		playerGrid.worldpos = new kha.math.Vector2(20,140);
+		playerGrid.humanControlled = true;
+		playerGrid.name = "human";
+		nationGrids.push(playerGrid);
+
+		enemyGrid = new NationGrid();
+		enemyGrid.worldpos = new kha.math.Vector2(20,5);
+		enemyGrid.name = "cpu";
+		nationGrids.push(enemyGrid);
+
+	}
+
+	function startBattle(){
+		inBattle = true;
+
+		for (grid in nationGrids){
+			var i = 0;
+			for (tile in grid.tiles){
+				var tx = i % grid.size.width;
+				var ty = Math.floor(i/grid.size.width);
+
+				if (tile == NationGrid.Tile.Soldier){
+					var citizen = new Soldier(this);
+					citizen.pos.x = (grid.worldpos.x) + (tx*16); 
+					citizen.pos.y = (grid.worldpos.y) + (ty*16);
+					citizen.returnToLocation = citizen.pos.mult(1);
+					citizen.fromNation = grid.name;
+					citizens.push(citizen);
+				}
+
+				i++;
+			}
+		}
+		
+	}
+
+	function update(): Void {
+		frame++;
+		if (frame == 90){
+			startBattle();
+		}
+
+		for (particle in particles){
+			particle.update();
+			if (particle.life < 1){
+				particles.remove(particle);
+			}
+		}
+
+		if (inBattle){
+			for (citizen in citizens){
+				citizen.update();
+				if (citizen.health < 1 || citizen.returned){
+					citizens.remove(citizen);
+				}
+			}
+		}else{
+			tilePlaceIndex += input.mouseScroll;
+			if (tilePlaceIndex < 0) tilePlaceIndex = 3;
+			if (tilePlaceIndex > 3) tilePlaceIndex = 0;
+
+			if (input.mouseButtonDown){
+				if (Util.aabbPointCheck(playerGrid.worldpos.x,playerGrid.worldpos.y,playerGrid.size.width*16,playerGrid.size.height*16,input.worldMousePos.x,input.worldMousePos.y)){
+					var tileMousex = Math.floor((input.worldMousePos.x - playerGrid.worldpos.x)/16);	
+					var tileMousey = Math.floor((input.worldMousePos.y - playerGrid.worldpos.y)/16);
+					playerGrid.setTile(tileMousex,tileMousey,NationGrid.Tile.createByIndex(tilePlaceIndex));
+				}
+			}
+		}
+		input.mouseScroll = 0;
+	}
+
+	function render(framebuffer: Framebuffer): Void {
+		var g = framebuffer.g2;
+		g.begin();//g.begin(true,kha.Color.fromBytes(145,190,100));
+		camera.transform(g);
+		for (grid in nationGrids){
+			grid.render(g);
+		}
+		for (citizen in citizens){
+			citizen.render(g);
+		}
+		for (particle in particles)
+			particle.render(g);
+		// g.drawImage(kha.Assets.images.Spritesheet,input.worldMousePos.x,input.worldMousePos.y);
+		
+		g.drawSubImage(kha.Assets.images.Spritesheet,input.worldMousePos.x,input.worldMousePos.y,16*tilePlaceIndex,0,16,16);
+		camera.restore(g);
+		g.end();
+	}
+}
