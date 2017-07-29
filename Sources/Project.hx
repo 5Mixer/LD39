@@ -13,44 +13,54 @@ class Project {
 	var tilePlaceIndex = 0;
 	public var citizens = new Array<Citizen>();
 	public var particles = new Array<Particle>();
+	public var projectiles = new Array<Projectile>();
 	var nationGrids = new Array<NationGrid>();
 	var frame = 0;
 	public function new() {
 		System.notifyOnRender(render);
 		Scheduler.addTimeTask(update, 0, 1 / 60);
 
-		input = new Input();
+		input = new Input(this);
 		camera = new Camera();
 
-		playerGrid = new NationGrid();
-		playerGrid.worldpos = new kha.math.Vector2(20,140);
-		playerGrid.humanControlled = true;
+		playerGrid = new NationGrid(true);
+		playerGrid.worldpos = new kha.math.Vector2(20,160);
 		playerGrid.name = "human";
 		nationGrids.push(playerGrid);
 
 		enemyGrid = new NationGrid();
-		enemyGrid.worldpos = new kha.math.Vector2(20,5);
+		enemyGrid.worldpos = new kha.math.Vector2(20,-15);
 		enemyGrid.name = "cpu";
 		nationGrids.push(enemyGrid);
 
 	}
 
-	function startBattle(){
+	public function startBattle(){
 		inBattle = true;
 
 		for (grid in nationGrids){
+			grid.endOfDay();
+
 			var i = 0;
 			for (tile in grid.tiles){
 				var tx = i % grid.size.width;
 				var ty = Math.floor(i/grid.size.width);
 
-				if (tile == NationGrid.Tile.Soldier){
-					var citizen = new Soldier(this);
+				var citizen:Citizen = null;
+				if (tile == NationGrid.Tile.Soldier)
+					citizen = new Soldier(this);
+				if (tile == NationGrid.Tile.Archer)
+					citizen = new Archer(this);
+				
+				if (citizen != null){
 					citizen.pos.x = (grid.worldpos.x) + (tx*16); 
 					citizen.pos.y = (grid.worldpos.y) + (ty*16);
 					citizen.returnToLocation = citizen.pos.mult(1);
+					citizen.returnToTile = new kha.math.Vector2(tx,ty);
+					citizen.nation = grid;
 					citizen.fromNation = grid.name;
 					citizens.push(citizen);
+					grid.setTile(tx,ty,NationGrid.Tile.Empty);
 				}
 
 				i++;
@@ -61,9 +71,7 @@ class Project {
 
 	function update(): Void {
 		frame++;
-		if (frame == 90){
-			startBattle();
-		}
+		
 
 		for (particle in particles){
 			particle.update();
@@ -71,13 +79,34 @@ class Project {
 				particles.remove(particle);
 			}
 		}
-
-		if (inBattle){
+		for (projectile in projectiles){
+			projectile.update();
+			if (projectile.life < 1){
+				projectiles.remove(projectile);
+				continue;
+			}
 			for (citizen in citizens){
-				citizen.update();
-				if (citizen.health < 1 || citizen.returned){
+				if (citizen.fromNation == projectile.fromNation) continue;
+				if(Util.aabbCheck(projectile.pos.x+3,projectile.pos.y+3,10,10,citizen.pos.x,citizen.pos.y,16,16)){
 					citizens.remove(citizen);
 				}
+			}
+		}
+
+		if (inBattle){
+			
+			for (citizen in citizens){
+				citizen.update();
+				if (citizen.health < 1){
+					citizens.remove(citizen);
+				}
+				if (citizen.returned){
+					citizen.nation.setTile(Math.floor(citizen.returnToTile.x),Math.floor(citizen.returnToTile.y),citizen.tileType);
+					citizens.remove(citizen);
+				}
+			}
+			if (citizens.length == 0){
+				inBattle = false;
 			}
 		}else{
 			tilePlaceIndex += input.mouseScroll;
@@ -97,7 +126,7 @@ class Project {
 
 	function render(framebuffer: Framebuffer): Void {
 		var g = framebuffer.g2;
-		g.begin();//g.begin(true,kha.Color.fromBytes(145,190,100));
+		g.begin(true,kha.Color.fromBytes(145,190,100));
 		camera.transform(g);
 		for (grid in nationGrids){
 			grid.render(g);
@@ -105,8 +134,12 @@ class Project {
 		for (citizen in citizens){
 			citizen.render(g);
 		}
+
+		for (projectile in projectiles)
+			projectile.render(g);
 		for (particle in particles)
 			particle.render(g);
+		
 		// g.drawImage(kha.Assets.images.Spritesheet,input.worldMousePos.x,input.worldMousePos.y);
 		
 		g.drawSubImage(kha.Assets.images.Spritesheet,input.worldMousePos.x,input.worldMousePos.y,16*tilePlaceIndex,0,16,16);

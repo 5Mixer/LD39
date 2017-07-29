@@ -3,19 +3,22 @@ package ;
 class Citizen {
 	public var pos:kha.math.Vector2;
 	public var returnToLocation:kha.math.Vector2;
+	public var returnToTile:kha.math.Vector2;
 	public var activity:Void->Void;
 	public var fromNation:String;
+	public var nation:NationGrid;
+	public var tileType:NationGrid.Tile = null;
 	var project:Project;
 	var frame = 0;
 	var velocity:kha.math.Vector2;
-	public var health = 30.;
+	public var health = 100.;
 	var speed = 1.;
 	public var returned = false;
 	public function new (project:Project){
 		pos = new kha.math.Vector2();
 		velocity = new kha.math.Vector2();
 		activity = idle;
-		speed = 1+Math.random();
+		speed = .5+Math.random();
 		this.project = project;
 	}
 	public function update (){
