@@ -23,6 +23,7 @@ class Soldier extends Citizen {
 			kills ++;
 			if (kills >= maxKills){
 				activity = returning;
+				nation.weapons--;
 			}else{
 				activity = idle;
 			}
@@ -36,6 +37,11 @@ class Soldier extends Citizen {
 				if (s != null)
 					s.volume = .01;
 			}
+		}
+		
+		if (nation.weapons < 1){
+			activity = returning;
+			return;
 		}
 		
 		if (health < 10)
@@ -54,6 +60,10 @@ class Soldier extends Citizen {
 			}
 		}
 
+		if (nation.weapons < 1){
+			activity = returning;
+			return;
+		}
 		
 		if (dist < 30){
 			attacking = closest;

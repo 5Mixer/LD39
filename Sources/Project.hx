@@ -8,7 +8,7 @@ class Project {
 	var playerGrid:NationGrid;
 	var enemyGrid:NationGrid;
 	var input:Input;
-	var inBattle = false;
+	public var inBattle = false;
 	public var camera:Camera;
 	var tilePlaceIndex = 0;
 	public var citizens = new Array<Citizen>();
@@ -55,6 +55,8 @@ class Project {
 					citizen = new Blacksmith(this);
 				if (tile == NationGrid.Tile.Farmer)
 					citizen = new Farmer(this);
+				if (tile == NationGrid.Tile.Market)
+					citizen = new Market(this);
 				
 				if (citizen != null){
 					citizen.pos.x = (grid.worldpos.x) + (tx*16); 
@@ -76,17 +78,18 @@ class Project {
 	function update(): Void {
 		frame++;
 		
+		var camPanSpeed = 3;
 		if (input.keys.get(kha.Key.UP))
-			camera.pos.y -= 1;
+			camera.pos.y -= camPanSpeed;
 		
 		if (input.keys.get(kha.Key.DOWN))
-			camera.pos.y += 1;
+			camera.pos.y += camPanSpeed;
 
 		if (input.keys.get(kha.Key.LEFT))
-			camera.pos.x -= 1;
+			camera.pos.x -= camPanSpeed;
 		
 		if (input.keys.get(kha.Key.RIGHT))
-			camera.pos.x += 1;
+			camera.pos.x += camPanSpeed;
 		
 		input.worldMousePos = camera.screenToWorld(input.mousePos);
 
@@ -150,8 +153,8 @@ class Project {
 			}
 		}else{
 			tilePlaceIndex += input.mouseScroll;
-			if (tilePlaceIndex < 0) tilePlaceIndex = 4;
-			if (tilePlaceIndex > 4) tilePlaceIndex = 0;
+			if (tilePlaceIndex < 0) tilePlaceIndex = NationGrid.Tile.createAll().length-1;
+			if (tilePlaceIndex > NationGrid.Tile.createAll().length-1) tilePlaceIndex = 0;
 
 			if (input.mouseButtonDown){
 				if (Util.aabbPointCheck(playerGrid.worldpos.x,playerGrid.worldpos.y,playerGrid.size.width*16,playerGrid.size.height*16,input.worldMousePos.x,input.worldMousePos.y)){

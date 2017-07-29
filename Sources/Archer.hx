@@ -41,6 +41,7 @@ class Archer extends Citizen {
 			project.projectiles.push(arrow);
 			kha.audio1.Audio.play(kha.Assets.sounds.BowShoot3);
 			arrows--;
+			nation.arrows--;
 		}
 		
 		distBasedBehaviour();
@@ -81,7 +82,7 @@ class Archer extends Citizen {
 		distBasedBehaviour();
 	}
 	function distBasedBehaviour(){
-		if (arrows < 1){
+		if (arrows < 1 || nation.arrows < 1){
 			activity = returning;
 		}else{
 			if (dist < 20){

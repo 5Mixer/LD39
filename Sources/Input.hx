@@ -19,7 +19,8 @@ class Input {
 		chars.set(char,true);
 
 		if (char == "r"){
-			project.startBattle();
+			if (!project.inBattle)
+				project.startBattle();
 		}
 		
 	}
