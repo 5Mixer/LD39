@@ -5,6 +5,8 @@ class Input {
 	public var mousePos = new kha.math.Vector2();
 	public var worldMousePos = new kha.math.Vector2();
 	public var mouseScroll = 0;
+	public var keys = new Map<kha.Key,Bool >();
+	public var chars = new Map<String,Bool >();
 	var project:Project;
 	public function new(project:Project){
 		kha.input.Mouse.get().notify(mouseDown,mouseUp,mouseMove,mouseWheel);
@@ -12,11 +14,21 @@ class Input {
 		this.project = project;
 	}
 	function keyDown (key:kha.Key,char:String){
+		
+		keys.set(key,true);
+		chars.set(char,true);
+
 		if (char == "r"){
 			project.startBattle();
 		}
+		
 	}
-	function keyUp (key:kha.Key,char:String){}
+	function keyUp (key:kha.Key,char:String){
+		
+		keys.set(key,false);
+		chars.set(char,false);
+
+	}
 	function mouseDown(a,b,c){
 		mouseButtonDown = true;
 	}
@@ -27,8 +39,7 @@ class Input {
 		mousePos.x = a;
 		mousePos.y = b;
 		
-		worldMousePos.x = a/4;
-		worldMousePos.y = b/4;
+		worldMousePos = project.camera.screenToWorld(mousePos);
 	}
 	function mouseWheel(scroll){
 		mouseScroll += scroll;

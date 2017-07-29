@@ -5,32 +5,19 @@ class Archer extends Citizen {
 	var dist = Math.POSITIVE_INFINITY;
 	var attacking:Citizen;
 	var damage = .25;
-	var firerate = 1;
+	var firerate = 30;
+	var arrows = 5;
 	override public function new (project){
 		super(project);
 		tileType = NationGrid.Tile.Archer;
 		speed = .5+(Math.random()*.75);
+		firerate = Math.floor(30+Math.random()*40);//30-50 frames between shots
+		arrows = 4+Math.floor(Math.random()*4);
 	}
 	override public function render(g:kha.graphics2.Graphics){
 		g.drawSubImage(kha.Assets.images.Spritesheet,pos.x,pos.y,4*16,0,16,16);
 		damage = .7+Math.random();
 
-		firerate = Math.floor(30+Math.random()*20);//30-50 frames between shots
-	}
-	function shoot(){
-		if (attacking == null || attacking.health < 1){
-			attacking = null;
-			activity = idle;
-		}else{
-			velocity = velocity.mult(.6);
-			attacking.health -= damage;
-			project.particles.push(new BloodParticle(new kha.math.Vector2(8+(pos.x+attacking.pos.x)/2,8+(pos.y+attacking.pos.y)/2)));
-			velocity = velocity.mult(.5);
-		}
-		distBasedBehaviour();
-		
-		if (health < 10)
-			activity = returning;
 	}
 	function firing (){
 		dist = Math.POSITIVE_INFINITY;
@@ -52,6 +39,8 @@ class Archer extends Citizen {
 			arrow.angle = angle;
 			arrow.setVelocityFromAngle(angle,3);
 			project.projectiles.push(arrow);
+			kha.audio1.Audio.play(kha.Assets.sounds.BowShoot3);
+			arrows--;
 		}
 		
 		distBasedBehaviour();
@@ -74,6 +63,7 @@ class Archer extends Citizen {
 			velocity.x = Math.cos(angle)*speed;
 			velocity.y = Math.sin(angle)*speed;
 		}
+		distBasedBehaviour();
 	}
 	override function idle () {
 		dist = Math.POSITIVE_INFINITY;
@@ -91,12 +81,18 @@ class Archer extends Citizen {
 		distBasedBehaviour();
 	}
 	function distBasedBehaviour(){
-		if (dist < 20){
+		if (arrows < 1){
 			activity = returning;
-		}else if (dist < 100){
-			activity = firing;
 		}else{
-			activity = gettingCloser;
+			if (dist < 20){
+				activity = returning;
+			}else if (dist < 100){
+				activity = firing;
+			}else if (dist < 400){
+				activity = gettingCloser;
+			}else{
+				activity = returning;
+			}
 		}
 	}
 }

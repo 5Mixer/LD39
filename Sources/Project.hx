@@ -9,7 +9,7 @@ class Project {
 	var enemyGrid:NationGrid;
 	var input:Input;
 	var inBattle = false;
-	var camera:Camera;
+	public var camera:Camera;
 	var tilePlaceIndex = 0;
 	public var citizens = new Array<Citizen>();
 	public var particles = new Array<Particle>();
@@ -51,6 +51,10 @@ class Project {
 					citizen = new Soldier(this);
 				if (tile == NationGrid.Tile.Archer)
 					citizen = new Archer(this);
+				if (tile == NationGrid.Tile.Blacksmith)
+					citizen = new Blacksmith(this);
+				if (tile == NationGrid.Tile.Farmer)
+					citizen = new Farmer(this);
 				
 				if (citizen != null){
 					citizen.pos.x = (grid.worldpos.x) + (tx*16); 
@@ -72,6 +76,19 @@ class Project {
 	function update(): Void {
 		frame++;
 		
+		if (input.keys.get(kha.Key.UP))
+			camera.pos.y -= 1;
+		
+		if (input.keys.get(kha.Key.DOWN))
+			camera.pos.y += 1;
+
+		if (input.keys.get(kha.Key.LEFT))
+			camera.pos.x -= 1;
+		
+		if (input.keys.get(kha.Key.RIGHT))
+			camera.pos.x += 1;
+		
+		input.worldMousePos = camera.screenToWorld(input.mousePos);
 
 		for (particle in particles){
 			particle.update();
@@ -88,7 +105,19 @@ class Project {
 			for (citizen in citizens){
 				if (citizen.fromNation == projectile.fromNation) continue;
 				if(Util.aabbCheck(projectile.pos.x+3,projectile.pos.y+3,10,10,citizen.pos.x,citizen.pos.y,16,16)){
-					citizens.remove(citizen);
+					projectiles.remove(projectile);
+					//citizens.remove(citizen);
+					citizen.health -= 25;
+					var sound = Math.random();
+					if (sound < .33){
+						kha.audio1.Audio.play(kha.Assets.sounds.Hit1);
+					}else if (sound < .66){
+						kha.audio1.Audio.play(kha.Assets.sounds.Hit2);
+					}else{
+						kha.audio1.Audio.play(kha.Assets.sounds.Hit3);
+					}
+					for (i in 0...5)
+						particles.push(new BloodParticle(new kha.math.Vector2(4+Math.random()*4+(projectile.pos.x+citizen.pos.x)/2,4+Math.random()*4+(projectile.pos.y+citizen.pos.y)/2)));
 				}
 			}
 		}
@@ -100,18 +129,29 @@ class Project {
 				if (citizen.health < 1){
 					citizens.remove(citizen);
 				}
-				if (citizen.returned){
-					citizen.nation.setTile(Math.floor(citizen.returnToTile.x),Math.floor(citizen.returnToTile.y),citizen.tileType);
-					citizens.remove(citizen);
+				
+			}
+			
+			var finished = true;
+			for (citizen in citizens){
+				if (!citizen.returned){
+					finished = false;
+					break;
 				}
 			}
-			if (citizens.length == 0){
+			if (finished){
+				for (citizen in citizens){
+					if (citizen.returned){
+						citizen.nation.setTile(Math.floor(citizen.returnToTile.x),Math.floor(citizen.returnToTile.y),citizen.tileType);
+					}
+					citizens.remove(citizen);
+				}
 				inBattle = false;
 			}
 		}else{
 			tilePlaceIndex += input.mouseScroll;
-			if (tilePlaceIndex < 0) tilePlaceIndex = 3;
-			if (tilePlaceIndex > 3) tilePlaceIndex = 0;
+			if (tilePlaceIndex < 0) tilePlaceIndex = 4;
+			if (tilePlaceIndex > 4) tilePlaceIndex = 0;
 
 			if (input.mouseButtonDown){
 				if (Util.aabbPointCheck(playerGrid.worldpos.x,playerGrid.worldpos.y,playerGrid.size.width*16,playerGrid.size.height*16,input.worldMousePos.x,input.worldMousePos.y)){

@@ -5,10 +5,13 @@ class Soldier extends Citizen {
 	var dist = Math.POSITIVE_INFINITY;
 	var attacking:Citizen;
 	var damage = .25;
+	var maxKills = 1;
+	var kills = 0;
 	override public function new (project){
 		super(project);
 		tileType = NationGrid.Tile.Soldier;
 		activity = idle;
+		maxKills = Math.floor(Math.random() * 2);
 	}
 	override public function render(g:kha.graphics2.Graphics){
 		g.drawSubImage(kha.Assets.images.Spritesheet,pos.x,pos.y,16,0,16,16);
@@ -17,11 +20,22 @@ class Soldier extends Citizen {
 	function attack(){
 		if (attacking == null || attacking.health < 1){
 			attacking = null;
-			activity = returning;
+			kills ++;
+			if (kills >= maxKills){
+				activity = returning;
+			}else{
+				activity = idle;
+			}
 		}else{
 			velocity = velocity.mult(.6);
 			attacking.health -= damage;
-			project.particles.push(new BloodParticle(new kha.math.Vector2(8+(pos.x+attacking.pos.x)/2,8+(pos.y+attacking.pos.y)/2)));
+			project.particles.push(new BloodParticle(new kha.math.Vector2(4+Math.random()*4+(pos.x+attacking.pos.x)/2,4+Math.random()*4+(pos.y+attacking.pos.y)/2)));
+			
+			if (frame%10==0){
+				var s = kha.audio1.Audio.play(kha.Assets.sounds.Hurt);
+				if (s != null)
+					s.volume = .01;
+			}
 		}
 		
 		if (health < 10)

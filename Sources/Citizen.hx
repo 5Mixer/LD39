@@ -36,7 +36,7 @@ class Citizen {
 	function returning (){
 		var vector = returnToLocation.sub(pos);
 		vector.normalize();
-		velocity = vector.mult(speed*.7);
+		velocity = vector.mult(speed*1);
 		if (returnToLocation.sub(pos).length < 3){
 			returned = true;
 		}

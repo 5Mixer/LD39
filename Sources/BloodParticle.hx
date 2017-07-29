@@ -1,21 +1,20 @@
 package ;
 
 class BloodParticle extends Particle {
+	var size = 1;
 	override public function new (pos){
 		super(pos);
 		velocity = new kha.math.Vector2((Math.random()*4)-2,Math.random()*.5);
-		life = 3 + Math.floor(Math.random() * 5);
+		life = 2 + Math.floor(Math.random() * 5);
+		size = 1+Math.floor(Math.random()*3);
 	}
 	override public function render(g:kha.graphics2.Graphics){
 		g.color = kha.Color.Red;
-		g.pushTransformation(g.transformation);
-		g.transformation._00 = 1;
-		g.transformation._11 = 1;
-		g.drawLine(pos.x*4,pos.y*4,(pos.x-velocity.x)*4,(pos.y-velocity.y)*4);
-		g.popTransformation();
+		g.fillRect(pos.x,pos.y,size,size);
+		g.color = kha.Color.White;
 	}
 	override public function update (){
 		super.update();
-		velocity.y += 1;
+		velocity.y += .3;
 	}
 }

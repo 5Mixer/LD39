@@ -31,19 +31,19 @@ class NationGrid {
 		// 	}
 		// }
 		this.humanControlled = humanControlled;
-		gold = 50000;
+		gold = 10000;
 		respect = 20;
 		food = 500;
 		weapons = 10;
 		
 		var m = 
 		"
-		sssssaaaaasssss
-		ssssfffffffssss
-		eeeefffffffeeee
-		eeeefffffffeeee
-		eeeeebbbbbeeeee
-		eeeeeebbbeeeeee";
+		sasasasasasasas
+		asasasasasasasa
+		efffffffffffffe
+		eefffffffffffee
+		eeefbbbbbbbfeee
+		eeeeebbbbbeeeee";
 		if (!humanControlled){
 			var ma = m.split("\n");
 			ma.reverse();
@@ -89,7 +89,20 @@ class NationGrid {
 				g.drawSubImage(kha.Assets.images.Spritesheet,x*16,y*16,16*(tile.getIndex()),0,16,16);
 			}
 		}
+		
+		g.color = kha.Color.Black;
+		g.fillRect(size.width*16,0,64,12*4);
+		g.color = kha.Color.White;
+		g.font = kha.Assets.fonts.OpenSans;
+		g.fontSize = 40;
+		g.transformation._00 = g.transformation._11 = 1;
+		g.drawString(gold+"g",2+size.width*16 *4,0);
+		g.drawString(respect+" respect",2+size.width*16 *4,12*4);
+		g.drawString(food+" food",2+size.width*16 *4,12*8);
+		g.drawString(weapons+" weapons",2+size.width*16 *4,12*12);
+
 		g.popTransformation();
+		
 	}
 	public function setTile(x:Int,y:Int,tile:Tile){
 		tiles[(y*size.width)+x] = tile;
@@ -101,12 +114,24 @@ class NationGrid {
 		for (tile in tiles){
 			if (tile != Tile.Empty)
 				population++;
-			if (tile == Tile.Farmer)
+			if (tile == Tile.Farmer){
 				food+=2;
-			if (tile == Tile.Blacksmith)
+				gold-=10;
+			}
+			if (tile == Tile.Blacksmith){
 				weapons +=1;
-			if (tile == Tile.Soldier)
+				food -= 1;
+				gold -= 10;
+			}
+			if (tile == Tile.Soldier){
 				totalSoldiers++;
+				gold -= 15;
+				food -= 1;
+			}
+			if (tile == Tile.Archer){
+				gold -= 20;
+				food -= 1;
+			}
 		}
 
 		if (weapons < totalSoldiers){
