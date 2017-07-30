@@ -11,7 +11,9 @@ class Menu extends Scene {
 		g.fontSize = 80;
 		g.drawString("Little Nations Of Power.",30,30);
 		g.fontSize = 40;
-		g.drawString("Win the war before you run out of power - respect and gold.",30,200);
+		g.drawString("A losing army turns to you as a leader, in the hope that your strategy will win the war.",30,200);
+		g.drawString("You know of two forms of power, respect and gold. You have both.",30,240);
+		g.drawString("Allocate your citizens to overthrow the enemy, but be careful, it is only through respect and gold that they will not overthrow you!.",30,280);
 		g.end();
 
 		if (frame == 200){

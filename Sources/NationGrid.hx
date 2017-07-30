@@ -26,6 +26,8 @@ class NationGrid {
 	public var weapons:Int;
 	public var arrows:Int;
 
+	public var startOfBattlePopulation:Int = 0;
+
 	public var reports:Array<String> = [];
 
 	public function new (humanControlled=false){
@@ -109,14 +111,14 @@ class NationGrid {
 		g.drawString(arrows+" arrows",2+size.width*16 *4,12*16);
 
 		
-		g.color = kha.Color.Black;
-		g.fillRect(10+(64*4)+(size.width*16)*4,0,1000,16*4*4);
-		g.color = kha.Color.White;
-		var y = 0;
-		for (report in reports){
-			g.drawString(report,270+size.width*16 *4,y);
-			y+=12*4;
-		}
+		// g.color = kha.Color.Black;
+		// g.fillRect(10+(64*4)+(size.width*16)*4,0,1000,16*4*4);
+		// g.color = kha.Color.White;
+		// var y = 0;
+		// for (report in reports){
+		// 	g.drawString(report,270+size.width*16 *4,y);
+		// 	y+=12*4;
+		// }
 
 		g.popTransformation();
 		
