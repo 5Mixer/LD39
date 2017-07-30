@@ -11,7 +11,7 @@ class Head extends Particle {
 		fall = 4+Math.floor(Math.random()*4);
 	}
 	override public function render(g:kha.graphics2.Graphics){
-		g.drawSubImage(kha.Assets.images.Spritesheet,pos.x,pos.y,7*16,16,16,16);
+		g.drawSubImage(kha.Assets.images.Spritesheet,pos.x,pos.y,(life > 30 ? 7 : 8)*16,16,16,16);
 	}
 	override public function update (){
 		super.update();

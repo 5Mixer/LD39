@@ -10,7 +10,7 @@ class Citizen {
 	public var tileType:NationGrid.Tile = null;
 	var project:Project;
 	public var frame = 0;
-	var velocity:kha.math.Vector2;
+	public var velocity:kha.math.Vector2;
 	public var health = 100.;
 	var speed = 1.;
 	public var returned = false;

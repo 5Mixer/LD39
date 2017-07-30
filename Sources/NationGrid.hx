@@ -19,8 +19,10 @@ typedef TileMap = {
 	var height:Int;
 }
 
+
 class NationGrid {
 	public var tiles:Array<Tile> = [];
+	var originalTiles:Array<Tile> = [];
 	public var size:GridSize = {width: 15, height: 6};
 	public var worldpos:kha.math.Vector2;
 	public var humanControlled = false;
@@ -38,7 +40,7 @@ class NationGrid {
 
 	var maps:Array<TileMap> = [];
 
-	public function new (humanControlled=false,level=4){
+	public function new (humanControlled=false,level=0){
 		// for (y in 0...size.height){
 		// 	for (x in 0...size.width){
 		// 		tiles.push(Math.random() > .9999999999 ? Tile.Empty : Tile.Soldier);
@@ -140,6 +142,7 @@ class NationGrid {
 				case _:Tile.Empty;
 			});
 		}
+		originalTiles = tiles.copy();
 
 		worldpos = new kha.math.Vector2(0,0);
 	}
@@ -280,6 +283,17 @@ class NationGrid {
 		if (gold < 2000){
 			reports.push("With less than 2000g, there is little faith in your leadership. -1 respect.");
 			respect--;
+		}
+
+		if (!humanControlled){
+			var chanceOfTileFix = Math.min(1,Math.max(0,gold/13000 + respect/40));
+			var tilesToBeReplaced = Math.floor(size.width*size.height*chanceOfTileFix);
+
+			for (i in 0...tilesToBeReplaced){
+				var n = Math.floor(Math.random() * size.width*size.height);
+				tiles.insert(n,originalTiles[n]);
+				tiles.splice(n+1,1);
+			}
 		}
 	}
 }

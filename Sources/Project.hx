@@ -17,8 +17,10 @@ class Project {
 	public var projectiles = new Array<Projectile>();
 	public var decorations = new Array<Decoration>();
 	public var nationGrids = new Array<NationGrid>();
-	var frame = 0;
-	var day = 0;
+	var showingBattleResult = false;
+	var battleResult:BattleResult;
+	public var frame = 0;
+	public var day = 0;
 	var currentLevel = 0;
 	var tileDescriptions = [
 		Tile.Empty => "Clear a tile.",
@@ -119,6 +121,54 @@ class Project {
 		
 		if (input.keys.get(kha.input.KeyCode.Right))
 			camera.pos.x += camPanSpeed;
+
+		
+		if (battleResult != null){
+			battleResult.update();
+			if (battleResult.time > battleResult.fulltime){
+				if (battleResult.win){
+					currentLevel++;
+					nationGrids.remove(battleResult.losingNation);
+					enemyGrid = new NationGrid(false,currentLevel);
+					enemyGrid.worldpos = new kha.math.Vector2(20,-15);
+					enemyGrid.name = "cpu";
+					nationGrids.push(enemyGrid);
+				}else{
+					var m = 
+					"
+					seeeeeeeeeeeeee
+					eeeeeeeeeeeeeee
+					eeeeeeeeeeeeeee
+					eeeeeeeeeeeeeee
+					eeeeeeeeeeeeeee
+					eeeeeeeeeeeeeee";
+					var valid = "es".split("");
+					var grid = nationGrids[0];
+					if (!grid.humanControlled){
+						var ma = m.split("\n");
+						ma.reverse();
+						m = ma.join("");
+					}
+					grid.tiles = [];
+					for (tile in m.split("")){
+					
+						if (valid.indexOf(tile) == -1) continue;
+						grid.tiles.push(switch(tile){
+							case "s":NationGrid.Tile.Soldier;
+							case "f":NationGrid.Tile.Farmer;
+							case "a":NationGrid.Tile.Archer;
+							case "b":NationGrid.Tile.Blacksmith;
+							case "m":NationGrid.Tile.Market;
+							case "e":NationGrid.Tile.Empty;
+							case "F":NationGrid.Tile.Fletcher;
+							case _:NationGrid.Tile.Empty;
+						});
+					}
+				}
+				battleResult = null;
+				showingBattleResult = false;
+			}
+		}
 		
 		input.worldMousePos = camera.screenToWorld(input.mousePos);
 
@@ -161,8 +211,17 @@ class Project {
 				if (citizen.health < 1){
 					particles.push(new Head(citizen.pos));
 					citizens.remove(citizen);
+					continue;
 				}
-				
+				// for (citizenb in citizens){
+				// 	var centre = new kha.math.Vector2(8,8);
+				// 	var diff = citizen.pos.add(centre).sub(citizenb.pos.add(centre));
+				// 	if (diff.length < 4){
+				// 		diff.normalize();
+				// 		citizen.pos = citizen.pos.add(diff.mult(2));
+				// 		citizenb.pos = citizenb.pos.sub(diff.mult(2));
+				// 	}
+				// }
 			}
 
 			// for (citizen in citizens){
@@ -207,6 +266,9 @@ class Project {
 				inBattle = false;
 			}
 		}else{
+			if (battleResult != null || showingBattleResult)
+				return;
+
 			tilePlaceIndex += input.mouseScroll;
 			if (tilePlaceIndex < 0) tilePlaceIndex = NationGrid.Tile.createAll().length-1;
 			if (tilePlaceIndex > NationGrid.Tile.createAll().length-1) tilePlaceIndex = 0;
@@ -232,14 +294,25 @@ class Project {
 				if (grid.respect < 1 || grid.gold < 1 || pop == 0){
 					if (grid.humanControlled){
 						//YOU LOSE()
+						showingBattleResult = true;
+						battleResult = new BattleResult(false,this); //This later invokes code to reset level.
+						battleResult.losingNation = grid;
 					}else{
+						showingBattleResult = true;
+						battleResult = new BattleResult(true,this);
+						battleResult.losingNation = grid;
+
+						//Increase size of player grid.
+						//Rewards, etc.
+						nationGrids[0].gold += grid.size.width*grid.size.height*2;
+
+						nationGrids[0].size.height++;
+						for (x in 0...nationGrids[0].size.width){
+							nationGrids[0].tiles.push(NationGrid.Tile.Empty);
+						}
+
 						kha.audio1.Audio.play(kha.Assets.sounds.Win);
-						currentLevel++;
-						nationGrids.remove(grid);
-						enemyGrid = new NationGrid(false,currentLevel);
-						enemyGrid.worldpos = new kha.math.Vector2(20,-15);
-						enemyGrid.name = "cpu";
-						nationGrids.push(enemyGrid);
+						
 					}
 				}
 			}
@@ -259,6 +332,9 @@ class Project {
 		for (decoration in decorations)
 			decoration.render(g);
 		
+		citizens.sort(function (a,b){
+			return a.pos.y > b.pos.y ? 1 : -1;
+		});
 		for (citizen in citizens){
 			citizen.render(g);
 		}
@@ -318,6 +394,9 @@ class Project {
 		g.drawString("Add to your forces.", Camera.zoom* (playerGrid.worldpos.x - 32) - g.font.width(g.fontSize,"Add to your forces."),Camera.zoom *playerGrid.worldpos.y);
 		g.transformation._00 = g.transformation._11 = Camera.zoom;
 		g.popTransformation();
+
+		if (battleResult != null)
+			battleResult.render(g);
 
 		// g.drawImage(kha.Assets.images.Spritesheet,input.worldMousePos.x,input.worldMousePos.y);
 		
