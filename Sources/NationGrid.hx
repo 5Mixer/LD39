@@ -7,6 +7,7 @@ enum Tile {
 	Farmer;
 	Archer;
 	Market;
+	Fletcher;
 }
 typedef GridSize = {
 	var width:Int;
@@ -48,15 +49,15 @@ class NationGrid {
 		sasasasasasasas
 		esasasasasasase
 		efeeeeeeefffmfe
-		eefbfbffbfeefee
-		eeefebeebbbfeee
+		eefbfbffbfeefeF
+		eeefebeebbbfeFF
 		eeemebebbbeeeee";
 		if (!humanControlled){
 			var ma = m.split("\n");
 			ma.reverse();
 			m = ma.join("");
 		}
-		var valid = "semafb".split("");
+		var valid = "semaFfb".split("");
 		tiles = [];
 		for (tile in m.split("")){
 			
@@ -68,6 +69,7 @@ class NationGrid {
 				case "b":Tile.Blacksmith;
 				case "m":Tile.Market;
 				case "e":Tile.Empty;
+				case "F":Tile.Fletcher;
 				case _:Tile.Empty;
 			});
 		}
@@ -75,8 +77,8 @@ class NationGrid {
 		worldpos = new kha.math.Vector2(0,0);
 	}
 	public function render(g:kha.graphics2.Graphics){
-		g.pushTranslation(worldpos.x*4,worldpos.y*4);
-		g.color = kha.Color.Black;
+		g.pushTranslation(worldpos.x*Camera.zoom,worldpos.y*Camera.zoom);
+		g.color = kha.Color.fromBytes(27,38,50);
 		g.fillRect(0,0,size.width*16,size.height*16);
 		g.color = kha.Color.fromBytes(145,190,100);
 		g.drawRect(0,0,size.width*16,size.height*16);
@@ -98,17 +100,17 @@ class NationGrid {
 			}
 		}
 		
-		g.color = kha.Color.Black;
-		g.fillRect(size.width*16,0,64,16*4);
+		g.color = kha.Color.fromBytes(27,38,50);
+		g.fillRect(size.width*16,0,64,32*Camera.zoom);
 		g.color = kha.Color.White;
-		g.font = kha.Assets.fonts.OpenSans;
-		g.fontSize = 40;
+		g.font = kha.Assets.fonts.mini;
+		g.fontSize = 10*Camera.zoom;
 		g.transformation._00 = g.transformation._11 = 1;
-		g.drawString(gold+"g",2+size.width*16 *4,0);
-		g.drawString(respect+" respect",2+size.width*16 *4,12*4);
-		g.drawString(food+" food",2+size.width*16 *4,12*8);
-		g.drawString(weapons+" weapons",2+size.width*16 *4,12*12);
-		g.drawString(arrows+" arrows",2+size.width*16 *4,12*16);
+		g.drawString(gold+"g",2+size.width*16 *Camera.zoom,0);
+		g.drawString(respect+" respect",2+size.width*16 *Camera.zoom,12*Camera.zoom);
+		g.drawString(food+" food",2+size.width*16 *Camera.zoom,12*Camera.zoom*2);
+		g.drawString(weapons+" weapons",2+size.width*16 *Camera.zoom,12*Camera.zoom*3);
+		g.drawString(arrows+" arrows",2+size.width*16 *Camera.zoom,12*Camera.zoom*4);
 
 		
 		// g.color = kha.Color.Black;
@@ -125,6 +127,9 @@ class NationGrid {
 	}
 	public function setTile(x:Int,y:Int,tile:Tile){
 		tiles[(y*size.width)+x] = tile;
+	}
+	public function getTile(x:Int,y:Int){
+		return tiles[(y*size.width)+x];
 	}
 	public function endOfDay() {
 		var population = 0;
@@ -145,6 +150,11 @@ class NationGrid {
 				food -= 1;
 				gold -= 10;
 				totalBlacksmiths++;
+			}
+			if (tile == Tile.Fletcher){
+				arrows += 3;
+				food -= 1;
+				gold -= 10;
 			}
 			if (tile == Tile.Soldier){
 				totalSoldiers++;

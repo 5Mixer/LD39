@@ -3,6 +3,7 @@ package;
 import kha.Framebuffer;
 import kha.Scheduler;
 import kha.System;
+import NationGrid.Tile;
 
 class Project {
 	var playerGrid:NationGrid;
@@ -14,9 +15,19 @@ class Project {
 	public var citizens = new Array<Citizen>();
 	public var particles = new Array<Particle>();
 	public var projectiles = new Array<Projectile>();
-	var nationGrids = new Array<NationGrid>();
+	public var decorations = new Array<Decoration>();
+	public var nationGrids = new Array<NationGrid>();
 	var frame = 0;
 	var day = 0;
+	var tileDescriptions = [
+		Tile.Empty => "Clear a tile.",
+		Tile.Soldier => "Fight with melee combat.",
+		Tile.Blacksmith => "Craft weapons for soldiers.",
+		Tile.Farmer => "Create food for all.",
+		Tile.Archer => "Fight with ranged combat.",
+		Tile.Market => "Generates gold from taxes.",
+		Tile.Fletcher => "Craft arrows for archers."
+	];
 	public function new() {
 		System.notifyOnRender(render);
 		Scheduler.addTimeTask(update, 0, 1 / 60);
@@ -34,6 +45,11 @@ class Project {
 		enemyGrid.name = "cpu";
 		nationGrids.push(enemyGrid);
 
+
+		var decorationsn = 5+Math.floor(Math.random()*10);
+		for (i in 0...decorationsn){
+			// decorations.push(new Decoration(Math.floor(Math.random()*600)-300,Math.floor(Math.random()*600)-300));
+		}
 	}
 
 	public function startBattle(){
@@ -61,6 +77,8 @@ class Project {
 					citizen = new Farmer(this);
 				if (tile == NationGrid.Tile.Market)
 					citizen = new Market(this);
+				if (tile == NationGrid.Tile.Fletcher)
+					citizen = new Fletcher(this);
 				
 				if (citizen != null){
 					pop++;
@@ -85,16 +103,16 @@ class Project {
 		frame++;
 		
 		var camPanSpeed = 3;
-		if (input.keys.get(kha.Key.UP))
+		if (input.keys.get(kha.input.KeyCode.Up))
 			camera.pos.y -= camPanSpeed;
 		
-		if (input.keys.get(kha.Key.DOWN))
+		if (input.keys.get(kha.input.KeyCode.Down))
 			camera.pos.y += camPanSpeed;
 
-		if (input.keys.get(kha.Key.LEFT))
+		if (input.keys.get(kha.input.KeyCode.Left))
 			camera.pos.x -= camPanSpeed;
 		
-		if (input.keys.get(kha.Key.RIGHT))
+		if (input.keys.get(kha.input.KeyCode.Right))
 			camera.pos.x += camPanSpeed;
 		
 		input.worldMousePos = camera.screenToWorld(input.mousePos);
@@ -126,7 +144,7 @@ class Project {
 						kha.audio1.Audio.play(kha.Assets.sounds.Hit3);
 					}
 					for (i in 0...5)
-						particles.push(new BloodParticle(new kha.math.Vector2(4+Math.random()*4+(projectile.pos.x+citizen.pos.x)/2,4+Math.random()*4+(projectile.pos.y+citizen.pos.y)/2)));
+						particles.push(new BloodParticle(new kha.math.Vector2(4+Math.random()*Camera.zoom+(projectile.pos.x+citizen.pos.x)/2,4+Math.random()*Camera.zoom+(projectile.pos.y+citizen.pos.y)/2)));
 				}
 			}
 		}
@@ -160,11 +178,18 @@ class Project {
 			if (tilePlaceIndex < 0) tilePlaceIndex = NationGrid.Tile.createAll().length-1;
 			if (tilePlaceIndex > NationGrid.Tile.createAll().length-1) tilePlaceIndex = 0;
 
+			// camera.scale.x += input.mouseScroll;
+			// camera.scale.y += input.mouseScroll;
+			// Camera.zoom += input.mouseScroll;
+
 			if (input.mouseButtonDown){
 				if (Util.aabbPointCheck(playerGrid.worldpos.x,playerGrid.worldpos.y,playerGrid.size.width*16,playerGrid.size.height*16,input.worldMousePos.x,input.worldMousePos.y)){
 					var tileMousex = Math.floor((input.worldMousePos.x - playerGrid.worldpos.x)/16);	
 					var tileMousey = Math.floor((input.worldMousePos.y - playerGrid.worldpos.y)/16);
-					playerGrid.setTile(tileMousex,tileMousey,NationGrid.Tile.createByIndex(tilePlaceIndex));
+					if (playerGrid.getTile(tileMousex,tileMousey) != NationGrid.Tile.createByIndex(tilePlaceIndex)){
+						playerGrid.setTile(tileMousex,tileMousey,NationGrid.Tile.createByIndex(tilePlaceIndex));
+						kha.audio1.Audio.play(kha.Assets.sounds.PlaceTile);
+					}
 				}
 			}
 
@@ -185,11 +210,14 @@ class Project {
 		
 
 		var g = framebuffer.g2;
-		g.begin(true,kha.Color.fromBytes(145,190,100));
+		g.begin(true,inBattle ? kha.Color.fromBytes(145,190,100) : kha.Color.fromBytes(37,68,64));
 		camera.transform(g);
 		for (grid in nationGrids){
 			grid.render(g);
 		}
+		for (decoration in decorations)
+			decoration.render(g);
+		
 		for (citizen in citizens){
 			citizen.render(g);
 		}
@@ -202,8 +230,30 @@ class Project {
 		var i = 0;
 		for (tile in NationGrid.Tile.createAll()){
 			var p = new kha.math.Vector2(playerGrid.worldpos.x - 32,playerGrid.worldpos.y + i*16);
+
+			if (Util.aabbPointCheck(p.x,p.y,16,16,input.worldMousePos.x,input.worldMousePos.y)){
+
+				g.pushTransformation(g.transformation);
+				g.transformation._00 = g.transformation._11 = 1;
+				g.font = kha.Assets.fonts.mini;
+				g.fontSize = 10*Camera.zoom;
+
+				g.color = kha.Color.fromBytes(27,38,50);
+				g.fillRect(p.x - 140*Camera.zoom,p.y*Camera.zoom,120*Camera.zoom,32*Camera.zoom);
+
+				g.color = kha.Color.White;
+
+				g.drawString(tile+"",p.x - 138*Camera.zoom,p.y*Camera.zoom);
+				g.drawString(tileDescriptions.get(tile),p.x - 138*Camera.zoom,(p.y+10)*Camera.zoom);
+
+				g.transformation._00 = g.transformation._11 = Camera.zoom;
+				g.popTransformation();
+
+				if (input.mouseButtonDown)
+					tilePlaceIndex = i;
+			}
 			
-			g.color = kha.Color.Black;
+			g.color = kha.Color.fromBytes(27,38,50);
 			g.drawRect(p.x,p.y,16,16);
 			if (i == tilePlaceIndex)
 				g.fillRect(p.x,p.y,16,16);
@@ -213,17 +263,19 @@ class Project {
 		}
 		g.pushTransformation(g.transformation);
 		g.transformation._00 = g.transformation._11 = 1;
-		g.font = kha.Assets.fonts.OpenSans;
-		g.fontSize = 40;
+		g.font = kha.Assets.fonts.mini;
+		g.fontSize = 20*Camera.zoom;
 
 		var topLeft = camera.screenToWorld(new kha.math.Vector2());
-		g.color = kha.Color.Black;
-		g.fillRect(topLeft.x*4,topLeft.y*4,4*framebuffer.width,4*16);
+		g.color = kha.Color.fromBytes(27,38,50);
+		g.fillRect(topLeft.x*Camera.zoom,topLeft.y*Camera.zoom,Camera.zoom*framebuffer.width,Camera.zoom*18);
 		g.color = kha.Color.White;
-		g.drawString("Day "+day, 4* topLeft.x,4*topLeft.y);
+
+		g.drawString("Day "+day, Camera.zoom * (topLeft.x+1),Camera.zoom*(topLeft.y-1));
 		
-		g.drawString("Add to your forces.", 4* (playerGrid.worldpos.x - 32) - g.font.width(g.fontSize,"Add to your forces."),4*playerGrid.worldpos.y);
-		g.transformation._00 = g.transformation._11 = 4;
+		g.fontSize = 10*Camera.zoom;
+		g.drawString("Add to your forces.", Camera.zoom* (playerGrid.worldpos.x - 32) - g.font.width(g.fontSize,"Add to your forces."),Camera.zoom *playerGrid.worldpos.y);
+		g.transformation._00 = g.transformation._11 = Camera.zoom;
 		g.popTransformation();
 
 		// g.drawImage(kha.Assets.images.Spritesheet,input.worldMousePos.x,input.worldMousePos.y);

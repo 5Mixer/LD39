@@ -14,8 +14,10 @@ class Soldier extends Citizen {
 		maxKills = Math.floor(Math.random() * 2);
 	}
 	override public function render(g:kha.graphics2.Graphics){
+		if (activity == returning) g.color = kha.Color.Red;
 		g.drawSubImage(kha.Assets.images.Spritesheet,pos.x,pos.y,16,0,16,16);
 		damage = .7+Math.random();
+		g.color = kha.Color.White;
 	}
 	function attack(){
 		if (attacking == null || attacking.health < 1){
