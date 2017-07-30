@@ -19,6 +19,7 @@ class Project {
 	public var nationGrids = new Array<NationGrid>();
 	var frame = 0;
 	var day = 0;
+	var currentLevel = 0;
 	var tileDescriptions = [
 		Tile.Empty => "Clear a tile.",
 		Tile.Soldier => "Fight with melee combat.",
@@ -163,31 +164,41 @@ class Project {
 				
 			}
 
-			for (citizen in citizens){
-				if (citizen.returned){
-					citizen.nation.setTile(Math.floor(citizen.returnToTile.x),Math.floor(citizen.returnToTile.y),citizen.tileType);
-					citizens.remove(citizen);
-				}
-			}
+			// for (citizen in citizens){
+			// 	if (citizen.returned && citizen.health > 0){
+			// 		citizen.nation.setTile(Math.floor(citizen.returnToTile.x),Math.floor(citizen.returnToTile.y),citizen.tileType);
+			// 		citizens.remove(citizen);
+			// 	}
+			// }
 
 			// if (citizens.length == 0)
 			// 	inBattle = false;
 			
 			
-			// var finished = true;
-			// for (citizen in citizens){
-			// 	if (!citizen.returned){
-			// 		finished = false;
-			// 		break;
-			// 	}
-			// }
-			if (citizens.length == 0){
+			var finished = true;
+			for (citizen in citizens){
+				if (!citizen.returned){
+					finished = false;
+					break;
+				}
+			}
+			if (finished){
 				Main.tune.volume = 1;
 				for (citizen in citizens){
-					// citizen.nation.setTile(citizen.returnToTile.x,citizen.returnToTile.y,citizen.tileType);
-					citizens.remove(citizen);
+					citizen.nation.setTile(citizen.returnToTile.x,citizen.returnToTile.y,citizen.tileType);
+					if (!citizens.remove(citizen)){
+						// trace("Unable to remove citizen of type "+citizen.tileType + " from "+citizen.returnToTile.x+", "+citizen.returnToTile.y+". Returned "+citizen.returned);
+					}
+					
 				}
-				// citizens = [];
+				for (citizen in citizens){
+					citizen.nation.setTile(citizen.returnToTile.x,citizen.returnToTile.y,citizen.tileType);
+					// trace("Unremoved citizen of type "+citizen.tileType + " from "+citizen.returnToTile.x+", "+citizen.returnToTile.y+". Returned "+citizen.returned);
+				}
+				if (citizens.length > 0){
+					throw("Error, not all citizens were removed.");
+				}
+				citizens = [];
 				inBattle = false;
 			}
 		}else{
@@ -211,7 +222,12 @@ class Project {
 					if (grid.humanControlled){
 						//YOU LOSE()
 					}else{
+						currentLevel++;
 						nationGrids.remove(grid);
+						enemyGrid = new NationGrid(false,currentLevel);
+						enemyGrid.worldpos = new kha.math.Vector2(20,-15);
+						enemyGrid.name = "cpu";
+						nationGrids.push(enemyGrid);
 					}
 				}
 			}

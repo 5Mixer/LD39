@@ -15,7 +15,7 @@ class Soldier extends Citizen {
 		damage = .7+Math.random();
 	}
 	override public function render(g:kha.graphics2.Graphics){
-		if (activity == returning) g.color = kha.Color.Red;
+		if (activity == returning || returned) g.color = kha.Color.Red;
 		//-Math.abs(Math.sin(frame/3)*5)
 		g.drawSubImage(kha.Assets.images.Spritesheet,pos.x,pos.y,16,0,16,16);
 		g.color = kha.Color.White;

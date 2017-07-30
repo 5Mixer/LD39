@@ -13,6 +13,11 @@ typedef GridSize = {
 	var width:Int;
 	var height:Int;
 }
+typedef TileMap = {
+	var tiles:String;
+	var width:Int;
+	var height:Int;
+}
 
 class NationGrid {
 	public var tiles:Array<Tile> = [];
@@ -31,7 +36,9 @@ class NationGrid {
 
 	public var reports:Array<String> = [];
 
-	public function new (humanControlled=false){
+	var maps:Array<TileMap> = [];
+
+	public function new (humanControlled=false,level=0){
 		// for (y in 0...size.height){
 		// 	for (x in 0...size.width){
 		// 		tiles.push(Math.random() > .9999999999 ? Tile.Empty : Tile.Soldier);
@@ -43,15 +50,60 @@ class NationGrid {
 		food = 400;
 		weapons = 10;
 		arrows = 100;
+
+		maps.push({
+			tiles:"
+			ssss
+			faea
+			feeb
+			femb",
+			width:4,
+			height:4
+		});
+
+		maps.push({
+			tiles:"
+			sssss
+			eaeae
+			eeeee
+			fmmbb
+			ffeeF",
+			width:5,
+			height:5
+		});
+
+		maps.push({
+			tiles:"
+			sasssas
+			smsssss
+			sfsfsfs
+			ffffbbb",
+			width:7,
+			height:4
+		});
+
+		maps.push({
+			tiles:"
+			aaaaaaaaaa
+			ssessesses
+			ffeeeembbb
+			ffeeeeeebb
+			ffFFFFFFee",
+			width:10,
+			height:5
+		});
 		
-		var m = 
-		"
-		sasasasasasasas
-		esasasasasasase
-		efeeeeeeefffmfe
-		eefbfbffbfeefeF
-		eeefebeebbbfeFF
-		eeemebebbbeeeee";
+		maps.push({
+			tiles:"
+			sasasasasasasas
+			esasasasasasase
+			efeeeeeeefffmfe
+			eefbfbffbfeefeF
+			eeefebeebbbfeFF
+			eeemebebbbeeeee",
+			width:15,
+			height:6
+		});
 
 		// m = 
 		// "
@@ -62,6 +114,10 @@ class NationGrid {
 		// eeeeeeeeeeeeeee
 		// eeeeeeeeeeeeeee";
 
+		var map = maps[level];
+		size.width = map.width;
+		size.height = map.height;
+		var m = map.tiles;
 
 		if (!humanControlled){
 			var ma = m.split("\n");
