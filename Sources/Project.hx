@@ -159,6 +159,7 @@ class Project {
 			for (citizen in citizens){
 				citizen.update();
 				if (citizen.health < 1){
+					particles.push(new Head(citizen.pos));
 					citizens.remove(citizen);
 				}
 				
@@ -195,8 +196,12 @@ class Project {
 					citizen.nation.setTile(citizen.returnToTile.x,citizen.returnToTile.y,citizen.tileType);
 					// trace("Unremoved citizen of type "+citizen.tileType + " from "+citizen.returnToTile.x+", "+citizen.returnToTile.y+". Returned "+citizen.returned);
 				}
+				for (citizen in citizens){
+					citizen.nation.setTile(citizen.returnToTile.x,citizen.returnToTile.y,citizen.tileType);
+					// trace("Unremoved citizen of type "+citizen.tileType + " from "+citizen.returnToTile.x+", "+citizen.returnToTile.y+". Returned "+citizen.returned);
+				}
 				if (citizens.length > 0){
-					throw("Error, not all citizens were removed.");
+					trace("Error, not all citizens were removed.");
 				}
 				citizens = [];
 				inBattle = false;
@@ -218,10 +223,17 @@ class Project {
 			}
 
 			for (grid in nationGrids){
-				if (grid.respect < 1 || grid.gold < 1){
+				var pop = 0;
+				for (tile in grid.tiles){
+					if (tile != NationGrid.Tile.Empty && tile != NationGrid.Tile.Market){
+						pop++;
+					}
+				}
+				if (grid.respect < 1 || grid.gold < 1 || pop == 0){
 					if (grid.humanControlled){
 						//YOU LOSE()
 					}else{
+						kha.audio1.Audio.play(kha.Assets.sounds.Win);
 						currentLevel++;
 						nationGrids.remove(grid);
 						enemyGrid = new NationGrid(false,currentLevel);

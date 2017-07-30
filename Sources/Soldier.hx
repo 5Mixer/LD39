@@ -13,12 +13,26 @@ class Soldier extends Citizen {
 		activity = idle;
 		maxKills = Math.floor(Math.random() * 2);
 		damage = .7+Math.random();
+		speed = 1+Math.random();
 	}
 	override public function render(g:kha.graphics2.Graphics){
-		if (activity == returning || returned) g.color = kha.Color.Red;
+		// if (activity == returning || returned) g.color = kha.Color.Red;
 		//-Math.abs(Math.sin(frame/3)*5)
 		g.drawSubImage(kha.Assets.images.Spritesheet,pos.x,pos.y,16,0,16,16);
 		g.color = kha.Color.White;
+	}
+	override public function update (){
+		super.update();
+		if (frame % 5 == 0 && velocity.length > .7 && !returned){
+			var footPos = pos.add(new kha.math.Vector2(Math.floor(Math.sin(frame/2.5)*4)+4,7));
+			var foot = new Footprint(footPos);
+			var vfoot = velocity.mult(1);
+			vfoot.normalize();
+			vfoot = vfoot.mult(2);
+			foot.toPos = foot.pos.add(vfoot);
+			project.particles.push(foot);
+			
+		}
 	}
 	function attack(){
 		if (attacking == null || attacking.health < 1){
@@ -51,7 +65,7 @@ class Soldier extends Citizen {
 			activity = returning;
 	}
 	override function idle () {
-		if (nation.weapons < 1){
+		if (nation.weapons < 1 || health < 10){
 			activity = returning;
 			return;
 		}
@@ -71,9 +85,11 @@ class Soldier extends Citizen {
 		if (dist < 30){
 			attacking = closest;
 			activity = attack;
+			return;
 		}
 		if (dist > 200){
 			activity = returning;
+			return;
 		}else{
 			if (closest != null){
 				var angle = Math.atan2(closest.pos.y - pos.y,closest.pos.x - pos.x);

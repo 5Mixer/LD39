@@ -38,7 +38,7 @@ class NationGrid {
 
 	var maps:Array<TileMap> = [];
 
-	public function new (humanControlled=false,level=0){
+	public function new (humanControlled=false,level=4){
 		// for (y in 0...size.height){
 		// 	for (x in 0...size.width){
 		// 		tiles.push(Math.random() > .9999999999 ? Tile.Empty : Tile.Soldier);
@@ -147,8 +147,6 @@ class NationGrid {
 		g.pushTranslation(worldpos.x*Camera.zoom,worldpos.y*Camera.zoom);
 		g.color = kha.Color.fromBytes(27,38,50);
 		g.fillRect(0,0,size.width*16,size.height*16);
-		g.color = kha.Color.fromBytes(145,190,100);
-		g.drawRect(0,0,size.width*16,size.height*16);
 		g.color = kha.Color.White;
 		
 		for (y in 0...size.height){
@@ -157,22 +155,23 @@ class NationGrid {
 				if (tile == null)
 					throw "Null tile";
 				
-				g.color = kha.Color.Green;
+				// g.color = kha.Color.Green;
+				g.drawSubImage(kha.Assets.images.Spritesheet,x*16,y*16,32,16,16,16);
 				g.drawSubImage(kha.Assets.images.Spritesheet,x*16,y*16,16*(tile.getIndex()),0,16,16);
 			}
 		}
 		
 		g.color = kha.Color.fromBytes(27,38,50);
-		g.fillRect(size.width*16,0,64,32*Camera.zoom);
+		g.fillRect(8+size.width*16,0,64,32*Camera.zoom);
 		g.color = kha.Color.White;
 		g.font = kha.Assets.fonts.mini;
 		g.fontSize = 10*Camera.zoom;
 		g.transformation._00 = g.transformation._11 = 1;
-		g.drawString(gold+"g",2+size.width*16 *Camera.zoom,0);
-		g.drawString(respect+" respect",2+size.width*16 *Camera.zoom,12*Camera.zoom);
-		g.drawString(food+" food",2+size.width*16 *Camera.zoom,12*Camera.zoom*2);
-		g.drawString(weapons+" weapons",2+size.width*16 *Camera.zoom,12*Camera.zoom*3);
-		g.drawString(arrows+" arrows",2+size.width*16 *Camera.zoom,12*Camera.zoom*4);
+		g.drawString(gold+" g",28+size.width*16 *Camera.zoom,0);
+		g.drawString(respect+" respect",28+size.width*16 *Camera.zoom,12*Camera.zoom);
+		g.drawString(food+" food",28+size.width*16 *Camera.zoom,12*Camera.zoom*2);
+		g.drawString(weapons+" weapons",28+size.width*16 *Camera.zoom,12*Camera.zoom*3);
+		g.drawString(arrows+" arrows",28+size.width*16 *Camera.zoom,12*Camera.zoom*4);
 
 		
 		// g.color = kha.Color.Black;

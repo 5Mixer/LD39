@@ -34,12 +34,15 @@ class Citizen {
 
 	}
 	function returning (){
+		if (returnToLocation.sub(pos).length < 3){
+			returned = true;
+			velocity = velocity.mult(0);
+			pos = returnToLocation;
+			return;
+		}
 		var vector = returnToLocation.sub(pos);
 		vector.normalize();
 		velocity = vector.mult(speed*1);
-		if (returnToLocation.sub(pos).length < 3){
-			returned = true;
-		}
 		// returned = true;
 		// pos = returnToLocation;
 	}

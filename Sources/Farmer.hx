@@ -7,7 +7,7 @@ class Farmer extends Citizen {
 		returned = true;
 	}
 	override public function render(g:kha.graphics2.Graphics){
-		if (activity == returning || returned) g.color = kha.Color.Red;
+		// if (activity == returning || returned) g.color = kha.Color.Red;
 		g.drawSubImage(kha.Assets.images.Spritesheet,pos.x,pos.y,3*16,0,16,16);
 		g.color = kha.Color.White;
 	}

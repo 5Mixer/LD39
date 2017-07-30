@@ -1,7 +1,7 @@
 package ;
 
 class Particle {
-	var pos:kha.math.Vector2;
+	public var pos:kha.math.Vector2;
 	var velocity:kha.math.Vector2;
 	public var life = 30;
 	var friction = .8;
