@@ -15,8 +15,9 @@ class Archer extends Citizen {
 		arrows = 4+Math.floor(Math.random()*4);
 	}
 	override public function render(g:kha.graphics2.Graphics){
+		if (activity == returning) g.color = kha.Color.Red;
 		g.drawSubImage(kha.Assets.images.Spritesheet,pos.x,pos.y,4*16,0,16,16);
-		damage = .7+Math.random();
+g.color = kha.Color.White;
 
 	}
 	function firing (){
@@ -67,6 +68,11 @@ class Archer extends Citizen {
 		distBasedBehaviour();
 	}
 	override function idle () {
+		if (arrows < 1 || nation.arrows < 1){
+			activity = returning;
+			return;
+		}
+
 		dist = Math.POSITIVE_INFINITY;
 		closest = null;
 		for (citizen in project.citizens){

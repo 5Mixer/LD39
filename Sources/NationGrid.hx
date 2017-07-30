@@ -52,6 +52,17 @@ class NationGrid {
 		eefbfbffbfeefeF
 		eeefebeebbbfeFF
 		eeemebebbbeeeee";
+
+		// m = 
+		// "
+		// sssssssssssssss
+		// eeeeeeeeeeeeeee
+		// eeeeeeeeeeeeeee
+		// eeeeeeeeeeeeeee
+		// eeeeeeeeeeeeeee
+		// eeeeeeeeeeeeeee";
+
+
 		if (!humanControlled){
 			var ma = m.split("\n");
 			ma.reverse();
@@ -87,15 +98,10 @@ class NationGrid {
 		for (y in 0...size.height){
 			for (x in 0...size.width){
 				var tile = tiles[y*size.width + x];
-				if (tile == null){
+				if (tile == null)
 					throw "Null tile";
-				}
-				// g.color = switch tile{
-				// 	case Tile.Empty: kha.Color.Black ;
-				// 	case Tile.Blacksmith:kha.Color.Blue;
-				// 	case Tile.Farmer: kha.Color.Yellow;
-				// 	case Tile.Soldier: kha.Color.White; 
-				// }
+				
+				g.color = kha.Color.Green;
 				g.drawSubImage(kha.Assets.images.Spritesheet,x*16,y*16,16*(tile.getIndex()),0,16,16);
 			}
 		}

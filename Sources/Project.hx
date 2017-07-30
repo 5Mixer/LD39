@@ -55,6 +55,9 @@ class Project {
 	public function startBattle(){
 		inBattle = true;
 
+
+		Main.tune.volume = .4;
+
 		day++;
 
 		for (grid in nationGrids){
@@ -85,7 +88,7 @@ class Project {
 					citizen.pos.x = (grid.worldpos.x) + (tx*16); 
 					citizen.pos.y = (grid.worldpos.y) + (ty*16);
 					citizen.returnToLocation = citizen.pos.mult(1);
-					citizen.returnToTile = new kha.math.Vector2(tx,ty);
+					citizen.returnToTile = new kha.math.Vector2i(tx,ty);
 					citizen.nation = grid;
 					citizen.fromNation = grid.name;
 					citizens.push(citizen);
@@ -101,6 +104,7 @@ class Project {
 
 	function update(): Void {
 		frame++;
+		// trac e(citizens.length);
 		
 		var camPanSpeed = 3;
 		if (input.keys.get(kha.input.KeyCode.Up))
@@ -158,29 +162,38 @@ class Project {
 				}
 				
 			}
-			
-			var finished = true;
+
 			for (citizen in citizens){
-				if (!citizen.returned){
-					finished = false;
-					break;
-				}
-			}
-			if (finished){
-				for (citizen in citizens){
+				if (citizen.returned){
 					citizen.nation.setTile(Math.floor(citizen.returnToTile.x),Math.floor(citizen.returnToTile.y),citizen.tileType);
 					citizens.remove(citizen);
 				}
+			}
+
+			// if (citizens.length == 0)
+			// 	inBattle = false;
+			
+			
+			// var finished = true;
+			// for (citizen in citizens){
+			// 	if (!citizen.returned){
+			// 		finished = false;
+			// 		break;
+			// 	}
+			// }
+			if (citizens.length == 0){
+				Main.tune.volume = 1;
+				for (citizen in citizens){
+					// citizen.nation.setTile(citizen.returnToTile.x,citizen.returnToTile.y,citizen.tileType);
+					citizens.remove(citizen);
+				}
+				// citizens = [];
 				inBattle = false;
 			}
 		}else{
 			tilePlaceIndex += input.mouseScroll;
 			if (tilePlaceIndex < 0) tilePlaceIndex = NationGrid.Tile.createAll().length-1;
 			if (tilePlaceIndex > NationGrid.Tile.createAll().length-1) tilePlaceIndex = 0;
-
-			// camera.scale.x += input.mouseScroll;
-			// camera.scale.y += input.mouseScroll;
-			// Camera.zoom += input.mouseScroll;
 
 			if (input.mouseButtonDown){
 				if (Util.aabbPointCheck(playerGrid.worldpos.x,playerGrid.worldpos.y,playerGrid.size.width*16,playerGrid.size.height*16,input.worldMousePos.x,input.worldMousePos.y)){

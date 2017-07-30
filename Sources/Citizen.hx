@@ -3,13 +3,13 @@ package ;
 class Citizen {
 	public var pos:kha.math.Vector2;
 	public var returnToLocation:kha.math.Vector2;
-	public var returnToTile:kha.math.Vector2;
+	public var returnToTile:kha.math.Vector2i;
 	public var activity:Void->Void;
 	public var fromNation:String;
 	public var nation:NationGrid;
 	public var tileType:NationGrid.Tile = null;
 	var project:Project;
-	var frame = 0;
+	public var frame = 0;
 	var velocity:kha.math.Vector2;
 	public var health = 100.;
 	var speed = 1.;
@@ -40,5 +40,7 @@ class Citizen {
 		if (returnToLocation.sub(pos).length < 3){
 			returned = true;
 		}
+		// returned = true;
+		// pos = returnToLocation;
 	}
 }

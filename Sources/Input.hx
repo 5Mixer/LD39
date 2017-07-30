@@ -17,44 +17,47 @@ class Input {
 		
 		keys.set(key,true);
 
-		if (key == kha.input.KeyCode.Space){
-			if (!project.inBattle)
-				project.startBattle();
-		}
+		
 		if (key == kha.input.KeyCode.R){
-			var m = 
-			"
-			sasasasasasasas
-			esasasasasasase
-			efeeeeeeefffmfe
-			eefbfbffbfeefeF
-			eeefebeebbbfeFF
-			eeemebebbbeeeee";
-			if (!project.nationGrids[1].humanControlled){
-				var ma = m.split("\n");
-				ma.reverse();
-				m = ma.join("");
-			}
 			var valid = "semaFfb".split("");
-			project.nationGrids[1].tiles = [];
-			for (tile in m.split("")){
+			for (grid in project.nationGrids){
+				var m = 
+					"
+				sssssssssssssss
+				eeeeeeeeeeeeeee
+				eeeeeeeeeeeeeee
+				eeeeeeeeeeeeeee
+				eeeeeeeeeeeeeee
+				eeeeeeeeeeeeeee";
+				if (!grid.humanControlled){
+					var ma = m.split("\n");
+					ma.reverse();
+					m = ma.join("");
+				}
+				grid.tiles = [];
+				for (tile in m.split("")){
 				
-				if (valid.indexOf(tile) == -1) continue;
-				project.nationGrids[1].tiles.push(switch(tile){
-					case "s":NationGrid.Tile.Soldier;
-					case "f":NationGrid.Tile.Farmer;
-					case "a":NationGrid.Tile.Archer;
-					case "b":NationGrid.Tile.Blacksmith;
-					case "m":NationGrid.Tile.Market;
-					case "e":NationGrid.Tile.Empty;
-					case "F":NationGrid.Tile.Fletcher;
-					case _:NationGrid.Tile.Empty;
-				});
+					if (valid.indexOf(tile) == -1) continue;
+					grid.tiles.push(switch(tile){
+						case "s":NationGrid.Tile.Soldier;
+						case "f":NationGrid.Tile.Farmer;
+						case "a":NationGrid.Tile.Archer;
+						case "b":NationGrid.Tile.Blacksmith;
+						case "m":NationGrid.Tile.Market;
+						case "e":NationGrid.Tile.Empty;
+						case "F":NationGrid.Tile.Fletcher;
+						case _:NationGrid.Tile.Empty;
+					});
+				}
 			}
 		}
 		
 	}
 	function keyUp (key:Int){
+		if (key == kha.input.KeyCode.Space){
+			if (!project.inBattle)
+				project.startBattle();
+		}
 		
 		keys.set(key,false);
 

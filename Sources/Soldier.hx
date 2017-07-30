@@ -12,11 +12,12 @@ class Soldier extends Citizen {
 		tileType = NationGrid.Tile.Soldier;
 		activity = idle;
 		maxKills = Math.floor(Math.random() * 2);
+		damage = .7+Math.random();
 	}
 	override public function render(g:kha.graphics2.Graphics){
 		if (activity == returning) g.color = kha.Color.Red;
+		//-Math.abs(Math.sin(frame/3)*5)
 		g.drawSubImage(kha.Assets.images.Spritesheet,pos.x,pos.y,16,0,16,16);
-		damage = .7+Math.random();
 		g.color = kha.Color.White;
 	}
 	function attack(){
@@ -50,6 +51,11 @@ class Soldier extends Citizen {
 			activity = returning;
 	}
 	override function idle () {
+		if (nation.weapons < 1){
+			activity = returning;
+			return;
+		}
+
 		dist = Math.POSITIVE_INFINITY;
 		closest = null;
 		for (citizen in project.citizens){
@@ -62,11 +68,6 @@ class Soldier extends Citizen {
 			}
 		}
 
-		if (nation.weapons < 1){
-			activity = returning;
-			return;
-		}
-		
 		if (dist < 30){
 			attacking = closest;
 			activity = attack;
